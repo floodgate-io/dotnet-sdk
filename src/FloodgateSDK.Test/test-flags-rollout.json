@@ -1,0 +1,44 @@
+﻿[
+  {
+    "id": "434f02ae-2845-4088-9bac-8cc728344dcc",
+    "key": "background-colour",
+    "value": "pink",
+    "is_rollout": true,
+    "rollouts": [
+      {
+        "value": "green",
+        "percentage": 12
+      },
+      {
+        "value": "blue",
+        "percentage": 12
+      },
+      {
+        "value": "red",
+        "percentage": 16
+      },
+      {
+        "value": "brown",
+        "percentage": 12
+      },
+      {
+        "value": "purple",
+        "percentage": 12
+      },
+      {
+        "value": "yellow",
+        "percentage": 12
+      },
+      {
+        "value": "pink",
+        "percentage": 12
+      },
+      {
+        "value": "orange",
+        "percentage": 12
+      }
+    ],
+    "is_targeting_enabled": false,
+    "targets": []
+  }
+]

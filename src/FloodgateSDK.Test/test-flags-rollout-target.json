@@ -1,0 +1,111 @@
+﻿[
+  {
+    "id": "434f02ae-2845-4088-9bac-8cc728344dcc",
+    "key": "background-colour",
+    "value": "pink",
+    "is_rollout": true,
+    "rollouts": [
+      {
+        "value": "green",
+        "percentage": 12
+      },
+      {
+        "value": "blue",
+        "percentage": 12
+      },
+      {
+        "value": "red",
+        "percentage": 16
+      },
+      {
+        "value": "brown",
+        "percentage": 12
+      },
+      {
+        "value": "purple",
+        "percentage": 12
+      },
+      {
+        "value": "yellow",
+        "percentage": 12
+      },
+      {
+        "value": "pink",
+        "percentage": 12
+      },
+      {
+        "value": "orange",
+        "percentage": 12
+      }
+    ],
+    "is_targeting_enabled": true,
+    "targets": [
+      {
+        "id": "dd8cf5e5-7890-4d62-81a2-ee4bd099d799",
+        "value": "yellow",
+        "is_rollout": false,
+        "rollouts": [],
+        "rules": [
+          {
+            "id": "63fe27d7-a619-456a-8fea-6380a46c50c9",
+            "attribute": "email",
+            "comparator": 1,
+            "values": [
+              "spiderman@marvel.com"
+            ]
+          },
+          {
+            "id": "2c7faf45-8ea5-4080-bd4a-41c62c26b920",
+            "attribute": "country",
+            "comparator": 1,
+            "values": [
+              "US"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "10c29e3b-6d4e-4213-91ac-525e9ddcc5fe",
+        "value": "orange",
+        "is_rollout": false,
+        "rollouts": [],
+        "rules": [
+          {
+            "id": "77367e77-d37a-4abd-a6be-bc82cfdc2b95",
+            "attribute": "email",
+            "comparator": 1,
+            "values": [
+              "spiderman@marvel.com.uk",
+              "spiderman@marvel.com"
+            ]
+          },
+          {
+            "id": "2792f66c-78d9-4be9-a737-c21ea5647c3a",
+            "attribute": "country",
+            "comparator": 1,
+            "values": [
+              "UK"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "32cf12cd-1b2d-444c-99f1-90a330d92e50",
+        "value": "brown",
+        "is_rollout": false,
+        "rollouts": [],
+        "rules": [
+          {
+            "id": "799253d1-1e75-4e52-a03c-28c3eae62f61",
+            "attribute": "email",
+            "comparator": 7,
+            "values": [
+              "@marvel.co.uk",
+              "@marvel.com"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]

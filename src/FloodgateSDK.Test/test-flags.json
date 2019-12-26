@@ -1,0 +1,11 @@
+﻿[
+  {
+    "id": "434f02ae-2845-4088-9bac-8cc728344dcc",
+    "key": "background-colour",
+    "value": "pink",
+    "is_rollout": false,
+    "rollouts": [],
+    "is_targeting_enabled": false,
+    "targets": []
+  }
+]

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FloodGate.SDK.Events;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization.Json;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace FloodGate.SDK
 {
-    public abstract class ClientConfigBase : IClientConfig
+    public abstract class ClientConfigBase : IClientConfig, IDisposable
     {
         internal static string AssemblyVersion = typeof(FloodGateClient).Assembly.GetName().Version?.ToString();
 
@@ -63,12 +64,24 @@ namespace FloodGate.SDK
         /// </summary>
         private User user;
 
+        //public IEventProcessor EventProcessor { get; private set; }
+
+        public IHttpResourceFetcher HttpResourceFetcher { get; private set; }
+
         internal const string API_VERSION = "v1";
 
-        public ClientConfigBase() { }
-
-        public virtual void InitializeConfig()
+        public ClientConfigBase()
         {
+            
+        }
+
+        public virtual void InitializeConfig(IHttpResourceFetcher httpResourceFetcher)
+        {
+            //EventProcessor = new EventProcessor(Logger);
+            // EventProcessor = eventProcessor;
+
+            HttpResourceFetcher = httpResourceFetcher;
+
             LoadData().Wait();
         }
 
@@ -179,9 +192,9 @@ namespace FloodGate.SDK
         {
             Logger.Info("Requesting flag data from server");
 
-            HttpResourceFetcher httpResourceFetcher = new HttpResourceFetcher(Logger);
+            // HttpResourceFetcher httpResourceFetcher = new HttpResourceFetcher(Logger);
 
-            var json = await httpResourceFetcher.FetchAsync(BuildUrl("flags"), string.Empty).ConfigureAwait(false);
+            var json = await HttpResourceFetcher.FetchAsync(BuildUrl("flags"), string.Empty, SdkKey).ConfigureAwait(false);
 
             if (ValidateJson(json))
             {
@@ -272,5 +285,20 @@ namespace FloodGate.SDK
                 throw;
             }
         }
+
+        public void Dispose()
+        {
+            //throw new NotImplementedException();
+        }
+
+        //public void FlushEvents()
+        //{
+        //    EventProcessor.ManualFlush();
+        //}
+
+        //public void Dispose()
+        //{
+        //    EventProcessor.Dispose();
+        //}
     }
 }

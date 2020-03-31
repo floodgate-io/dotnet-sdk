@@ -13,6 +13,10 @@
     <Copyright>Copyright 2019</Copyright>
     <RepositoryUrl>https://github.com/floodgate-io/dotnet-sdk</RepositoryUrl>
     <PackageReleaseNotes>Updated SDK to target .NET Standard 2.0+ (.NET Core 2.0+) and .NET Framework 4.5+</PackageReleaseNotes>
+    <PackageLicenseUrl></PackageLicenseUrl>
+    <RepositoryType>Git</RepositoryType>
+    <PackageTags>featureflag featuretoggle canaryrelease releasemanagement softlaunch targetedlaunch cicd floodgate</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
@@ -28,6 +32,10 @@
     <Reference Include="System.Xml.Linq" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Net.Http" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
   </ItemGroup>
 
 </Project>

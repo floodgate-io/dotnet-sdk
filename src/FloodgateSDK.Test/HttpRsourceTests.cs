@@ -1,6 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace FloodGate.SDK.Test
+namespace FloodGate.SDK.Tests
 {
     [TestClass()]
     public class HttpRsourceTests

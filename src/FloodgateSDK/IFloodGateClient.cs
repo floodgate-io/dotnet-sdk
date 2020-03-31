@@ -47,5 +47,10 @@ namespace FloodGate.SDK
         /// <param name="user">Optional: A user to compare against when flag targeting is enabled</param>
         /// <returns>Double value of the flag</returns>
         double GetValue(string key, double defaultValue, User user = null);
+
+        /// <summary>
+        /// Flush any events in the event queue to the Floodgate servers
+        /// </summary>
+        void FlushEvents();
     }
 }

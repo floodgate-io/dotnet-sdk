@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FloodGate.SDK.Events;
+using System;
 using System.Collections.Generic;
 
 namespace FloodGate.SDK
@@ -63,7 +64,7 @@ namespace FloodGate.SDK
         /// <summary>
         /// Initialize the current configuration object
         /// </summary>
-        void InitializeConfig();
+        void InitializeConfig(IHttpResourceFetcher httpResourceFetcher);
 
         /// <summary>
         /// Build Uri for communicating to floodgate.io Api servers
@@ -72,7 +73,9 @@ namespace FloodGate.SDK
         /// <returns></returns>
         Uri BuildUrl(string endpoint);
 
-
-        // bool IsConfigReady(int milliseconds);
+        /// <summary>
+        /// Flush event queue
+        /// </summary>
+        //void FlushEvents();
     }
 }

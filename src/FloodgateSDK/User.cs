@@ -10,6 +10,7 @@ namespace FloodGate.SDK
     /// </summary>
     public class User
     {
+
         /// <summary>
         /// Default: Unique identifier of the current user
         /// </summary>
@@ -19,6 +20,14 @@ namespace FloodGate.SDK
         /// Default: Current users email address
         /// </summary>
         public string Email { get; set; }
+
+        public string Name { get; set; }
+
+        public string FirstName { get; set; }
+
+        public string LastName { get; set; }
+
+        public string Country { get; set; }
 
         /// <summary>
         /// Disctionary containing custom attributes of the user

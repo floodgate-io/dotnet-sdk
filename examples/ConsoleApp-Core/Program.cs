@@ -20,21 +20,23 @@ namespace ConsoleApp_Core
                 FloodGateWrapper floodgate = FloodGateWrapper.Instance;
 
                 var customAttributes = new Dictionary<string, string>() {
-                    { "name", "Peter Parker" },
-                    { "subscription", "Gold" },
-                    { "country", "UK" },
-                    { "role", "User" }
+                    { "SubscriptionPlan", "Gold" },
+                    { "Role", "User" }
                 };
 
                 User user = new User("d2405fc0-c9cd-49e7-a07e-bf244d6d360b")
                 {
                     Email = "peter@marvel.com",
+                    Name = "Peter Parker",
+                    Country = "UK",
                     CustomAttributes = customAttributes
                 };
 
-                var flag1 = floodgate.Client.GetValue("background-colour", "grey", user);
-                Console.WriteLine($"`background-colour` = {flag1}");
+                var flag1 = floodgate.Client.GetValue("enable-team-feature", false, user);
+                Console.WriteLine($"`enable-team-feature` = {flag1}");
 
+                Console.ReadLine();
+                
                 floodgate.Client.Dispose();
             }
             catch (Exception ex)

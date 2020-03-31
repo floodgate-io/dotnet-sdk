@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FloodGate.SDK.Events;
+using System;
 using System.Threading;
 
 namespace FloodGate.SDK
@@ -12,9 +13,9 @@ namespace FloodGate.SDK
 
         private Timer timer;
 
-        public override void InitializeConfig()
+        public override void InitializeConfig(IHttpResourceFetcher httpResourceFetcher)
         {
-            base.InitializeConfig();
+            base.InitializeConfig(httpResourceFetcher);
 
             if (RefreshInterval <= 0)
             {
@@ -38,8 +39,10 @@ namespace FloodGate.SDK
             FetchFlagsServerAsync().Wait();
         }
 
-        public void Dispose()
+        public new void Dispose()
         {
+            //base.Dispose();
+
             timer?.Dispose();
         }
     }

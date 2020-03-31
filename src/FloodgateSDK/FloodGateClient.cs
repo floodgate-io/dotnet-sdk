@@ -2,6 +2,7 @@
 using System.Reflection;
 using System.Linq;
 using FloodGate.SDK.Evaluators;
+using FloodGate.SDK.Events;
 
 namespace FloodGate.SDK
 {
@@ -10,9 +11,13 @@ namespace FloodGate.SDK
     /// </summary>
     public class FloodGateClient : IFloodGateClient
 	{
-		private ILogger log;
+		private ILogger logger;
 
 		private IClientConfig config;
+
+        private IEventProcessor eventProcessor;
+
+        private HttpResourceFetcher httpResourceFetcher;
 
 		private static readonly string version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
@@ -22,55 +27,41 @@ namespace FloodGate.SDK
 		/// </summary>
 		/// <param name="sdkKey">Floodgate environment SDK Key</param>
         /// <exception cref="TimeoutException">Throws timeout exception on configuration load timeout</exception>
-		public FloodGateClient(string sdkKey) : this(new AutoUpdateClientConfig { SdkKey = sdkKey, Cache = new InMemoryStoreCache() })
+		public FloodGateClient(string sdkKey) : this(new AutoUpdateClientConfig { SdkKey = sdkKey, Cache = new InMemoryStoreCache(), Logger = new DefaultLogger() })
 		{
-		}
+            InitializeClient();
+        }
 
-		/// <summary>
-		/// Create a new instance of the FloodGate client based on a custom configuration
-		/// </summary>
-		/// <param name="config"></param>
-		public FloodGateClient(AutoUpdateClientConfig config)
-		{
-			try
-			{
-                config.ValidateConfig();
+        public FloodGateClient(IClientConfig config)
+        {
+            this.config = config;
 
-                config.InitializeConfig();
-                
-                InitializeClient(config);
-			}
-			catch(Exception exception)
-			{
-				throw new ApplicationException("FloodGate AutoUpdateClientConfig failed to load", exception);
-			}
-		}
+            InitializeClient();
+        }
 
-        public FloodGateClient(DefaultClientConfig config)
+        private void InitializeClient()
         {
             try
             {
-                config.ValidateConfig();
-                
-                config.InitializeConfig();
+                logger = config.Logger;
 
-                InitializeClient(config);
+                eventProcessor = new EventProcessor(logger);
+
+                httpResourceFetcher = new HttpResourceFetcher(logger);
+
+                config.ValidateConfig();
+
+                config.InitializeConfig(httpResourceFetcher);
+
+                logger.Debug($"Version: {version}");
+
+                logger.Debug($"SdkApiUrl: {config.BuildUrl("flags")?.ToString()}");
             }
             catch (Exception exception)
             {
-                throw new ApplicationException("FloodGate DefaultClientConfig failed to load", exception);
+                // TODO: Get the config type
+                throw new ApplicationException("FloodGate config failed to load", exception);
             }
-        }
-
-        private void InitializeClient(IClientConfig configuration)
-		{
-            config = configuration;
-
-            log = config.Logger;
-
-            log.Debug($"Version: {version}");
-
-            log.Debug($"SdkApiUrl: {config.BuildUrl("flags")?.ToString()}");
         }
 
         /// <summary>
@@ -91,7 +82,7 @@ namespace FloodGate.SDK
                 // Override the user if one if passed
                 if (overrideUser != null)
                 {
-                    log.Info($"Overriding user");
+                    logger.Info($"Overriding user");
 
                     user = overrideUser;
                 }
@@ -99,7 +90,7 @@ namespace FloodGate.SDK
                 // If there is no flag data present at all, return the default value
                 if (config.Flags.ToList().Count == 0)
                 {
-                    log.Error("No flag data available");
+                    logger.Error("No flag data available");
 
                     return defaultValue;
                 }
@@ -109,7 +100,7 @@ namespace FloodGate.SDK
                 // If no flag is found, return the default value
                 if (flag == null)
                 {
-                    log.Info($"{key} not found");
+                    logger.Info($"{key} not found");
 
                     return defaultValue;
                 }
@@ -117,20 +108,28 @@ namespace FloodGate.SDK
                 // If user is null then cannot evaluate targets or rollouts, return the flag default value
                 if (user == null)
                 {
-                    log.Info($"{flag.Id}, {flag.Value}");
-                    
+                    logger.Info($"{flag.Id}, {flag.Value}");
+
+                    eventProcessor.AddToQueue(new FlagEvaluationEvent(config.SdkKey, flag));
+
                     return (T)Convert.ChangeType(flag.Value, typeof(T));
                 }
+
+                // There must be a user, log the attributes
+                eventProcessor.AddToQueue(new SetUserEvent(config.SdkKey, user));
 
                 // If targeting not enabled, try and evaluate rollouts
                 if (!flag.IsTargetingEnabled)
                 {
-                    log.Info($"{flag.Id}, {flag.Value}");
+                    logger.Info($"{flag.Id}, {flag.Value}");
+
+                    eventProcessor.AddToQueue(new FlagEvaluationEvent(config.SdkKey, flag));
 
                     // Evaluate percentage rollouts
                     if (flag.IsRollout)
                     {
-                        return RolloutEvaluator.Evaluate<T>(key, user.Id, flag.Rollouts, (T)Convert.ChangeType(flag.Value, typeof(T)), log); 
+                        
+                        return RolloutEvaluator.Evaluate<T>(key, user.Id, flag.Rollouts, (T)Convert.ChangeType(flag.Value, typeof(T)), logger); 
                     }
 
                     return (T)Convert.ChangeType(flag.Value, typeof(T));
@@ -139,13 +138,16 @@ namespace FloodGate.SDK
                 // If targeting is enabled and there are targets present, evaluate the targets
                 if (flag.Targets.Count > 0)
                 {
-                    log.Info("Evaluating targets");
-                    return TargetEvaluator.Evaluate<T>(key, user, flag, (T)Convert.ChangeType(flag.Value, typeof(T)), log);
+                    logger.Info("Evaluating targets");
+
+                    eventProcessor.AddToQueue(new FlagEvaluationEvent(config.SdkKey, flag));
+
+                    return TargetEvaluator.Evaluate<T>(key, user, flag, (T)Convert.ChangeType(flag.Value, typeof(T)), logger);
                 }
             }
             catch (Exception exception)
             {
-                log.Error(exception);
+                logger.Error(exception);
 
                 throw;
             }
@@ -153,6 +155,7 @@ namespace FloodGate.SDK
             return defaultValue;
         }
 
+        #region GetValue methods
         public string GetValue(string key, User user = null)
         {
             return Evaluate(key, config.DefaultFlagState.ToString(), user);
@@ -177,9 +180,26 @@ namespace FloodGate.SDK
         {
             return Evaluate(key, defaultValue, user);
         }
+        #endregion
+
+
+        public void FlushEvents()
+        {
+            eventProcessor.ManualFlush();
+        }
 
         public void Dispose()
         {
+            if (logger != null && logger is IDisposable)
+            {
+                ((IDisposable)logger).Dispose();
+            }
+
+            if (eventProcessor != null && eventProcessor is IDisposable)
+            {
+                ((IDisposable)eventProcessor).Dispose();
+            }
+
             if (config != null && config is IDisposable)
             {
                 ((IDisposable)config).Dispose();

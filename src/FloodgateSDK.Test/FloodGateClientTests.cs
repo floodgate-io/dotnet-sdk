@@ -149,6 +149,8 @@ namespace FloodGate.SDK.Tests
             User user = new User("d2405fc0-c9cd-49e7-a07e-bf244d6d360b")
             {
                 Email = "spiderman@marvel.com",
+                Name = "Peter Parker",
+                Country = "US",
                 CustomAttributes = customAttributes
             };
 
@@ -183,6 +185,8 @@ namespace FloodGate.SDK.Tests
             User user = new User("d2405fc0-c9cd-49e7-a07e-bf244d6d360b")
             {
                 Email = "spiderman@marvel.com",
+                Name = "Peter Parker",
+                Country = "UK",
                 CustomAttributes = customAttributes
             };
 

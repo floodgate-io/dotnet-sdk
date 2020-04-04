@@ -7,7 +7,6 @@ namespace FloodGate.SDK
     {
         public void Initialize()
         {
-            
         }
 
         public bool Exists(string name)
@@ -35,9 +34,12 @@ namespace FloodGate.SDK
         {
             ObjectCache cache = MemoryCache.Default;
 
+            // TODO: Update expirt based on refresh time
             CacheItemPolicy policy = new CacheItemPolicy();
 
-            policy.AbsoluteExpiration = DateTimeOffset.Now.AddMinutes(10);
+            policy.Priority = CacheItemPriority.NotRemovable;
+            // policy.AbsoluteExpiration = DateTimeOffset.Now.AddMinutes(10);
+            // policy.AbsoluteExpiration = DateTimeOffset.Now.AddSeconds(_cacheSeconds);
 
             cache.Set(cacheName, objectToCache, policy);
         }

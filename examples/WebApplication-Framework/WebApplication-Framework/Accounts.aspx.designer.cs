@@ -11,7 +11,7 @@ namespace WebApplication_Framework
 {
 
 
-    public partial class Default
+    public partial class Accounts
     {
 
         /// <summary>

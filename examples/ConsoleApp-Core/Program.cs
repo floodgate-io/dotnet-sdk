@@ -27,13 +27,24 @@ namespace ConsoleApp_Core
                 User user = new User("d2405fc0-c9cd-49e7-a07e-bf244d6d360b")
                 {
                     Email = "peter@marvel.com",
-                    Name = "Peter Parker",
+                    Name = "Spiderman",
                     Country = "UK",
                     CustomAttributes = customAttributes
                 };
 
-                var flag1 = floodgate.Client.GetValue("enable-team-feature", false, user);
-                Console.WriteLine($"`enable-team-feature` = {flag1}");
+                string flagKey, flagResult;
+
+                flagKey = "boolean-flag";
+                flagResult = floodgate.Client.GetValue(flagKey, false, user).ToString();
+                Console.WriteLine($"`{flagKey}` = {flagResult}");
+
+                flagKey = "multivariate-flag";
+                flagResult = floodgate.Client.GetValue(flagKey, "black", user);
+                Console.WriteLine($"`{flagKey}` = {flagResult}");
+
+                flagKey = "multivariate-flag";
+                flagResult = floodgate.Client.GetValue(flagKey, "black");
+                Console.WriteLine($"`{flagKey}` = {flagResult}");
 
                 Console.ReadLine();
                 

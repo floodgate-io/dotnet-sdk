@@ -50,11 +50,25 @@ namespace FloodGate.SDK
 
         public string GetAttributeValue(string key)
         {
-            if (key == Consts.USER_ATTRIBUTE_ID)
+            key = key.ToLower();
+
+            if (key == Consts.USER_ATTRIBUTE_ID.ToLower())
                 return Id;
 
-            if (key == Consts.USER_ATTRIBUTE_EMAIL)
+            if (key == Consts.USER_ATTRIBUTE_EMAIL.ToLower())
                 return Email;
+
+            if (key == Consts.USER_ATTRIBUTE_NAME.ToLower())
+                return Name;
+
+            if (key == Consts.USER_ATTRIBUTE_FIRSTNAME.ToLower())
+                return FirstName;
+
+            if (key == Consts.USER_ATTRIBUTE_LASTNAME.ToLower())
+                return LastName;
+
+            if (key == Consts.USER_ATTRIBUTE_COUNTRY.ToLower())
+                return Country;
 
             // Check custom attributes
             var attribute = CustomAttributes.Where(q => q.Key.ToLower() == key.ToLower()).FirstOrDefault();

@@ -22,7 +22,7 @@ namespace FloodGate.SDK
             httpClient.DefaultRequestHeaders.Add("X-FloodGate-SDK-Version", ClientConfigBase.AssemblyVersion);
         }
 
-        public async Task<string> FetchAsync(Uri requestUri, string currentConfig, string sdkKey, CancellationToken token = default(CancellationToken))
+        public async Task<string> FetchAsync(Uri requestUri, IClientConfig config, string sdkKey, CancellationToken token = default(CancellationToken))
         {
             string result = null;
 
@@ -36,20 +36,17 @@ namespace FloodGate.SDK
                     RequestUri = requestUri
                 };
 
-                //if (lastConfig.HttpETag != null)
-                //{
-                //    request.Headers.IfNoneMatch.Add(new EntityTagHeaderValue(lastConfig.HttpETag));
-                //}
-
-                //var response = await this.httpClient.SendAsync(request).ConfigureAwait(false);
+                if (config.ETag != null)
+                {
+                    request.Headers.IfNoneMatch.Add(new EntityTagHeaderValue(config.ETag));
+                }
 
                 using (var response = await httpClient.SendAsync(request, token).ConfigureAwait(false))
                 {
-                    // TODO: Get the ETag data and set the currentConfig
-
-                    if (response.StatusCode == System.Net.HttpStatusCode.NotModified && !string.IsNullOrEmpty(currentConfig))
+                    if (response.StatusCode == System.Net.HttpStatusCode.NotModified)
                     {
-                        result = currentConfig;
+                        logger.Info($"CDN not modified");
+                        return result; // Just return empty result, flags will be loaded from the cache
                     }
                     else if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
                     {
@@ -58,6 +55,9 @@ namespace FloodGate.SDK
                     else if (response.IsSuccessStatusCode)
                     {
                         result = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+                        config.ETag = response.Headers.ETag?.ToString() ?? null;
+                        logger.Info($"ETag = {config.ETag}");
                     }
                 }
             }

@@ -33,6 +33,11 @@ namespace FloodGate.SDK
         /// </summary>
         string ConfigFile { get; set; }
 
+        /// <summary>
+        /// Url for overriding the default location for sending events
+        /// </summary>
+        string EventsUrl { get; set; }
+
         User GetUser();
 
         /// <summary>
@@ -49,6 +54,10 @@ namespace FloodGate.SDK
         /// List of feature flags for the current configuration
         /// </summary>
         List<FeatureFlagEntity> Flags { get; }
+
+        List<FeatureFlagEntity> GetFlags();
+
+        string RawConfigData { get; set; }
 
         /// <summary>
         /// The default state returned if a flag is not found
@@ -74,8 +83,27 @@ namespace FloodGate.SDK
         Uri BuildUrl(string endpoint);
 
         /// <summary>
-        /// Flush event queue
+        /// When will the current cache expire
         /// </summary>
-        //void FlushEvents();
+        //int CacheExpiry { get; set; }
+
+        //bool IsCacheExpired { get; }
+
+        /// <summary>
+        /// Check to see if the config needs to be refreshed
+        /// </summary>
+        //void Refresh();
+
+        string ETag { get; set; }
+
+        /// <summary>
+        /// The time the data was fetched from the server
+        /// </summary>
+        //DateTime FetchedTime { get; set; }
+
+        /// <summary>
+        /// Force refresh of the configuration
+        /// </summary>
+        void Refresh();
     }
 }

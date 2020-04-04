@@ -5,7 +5,7 @@ using WebApplication_Framework.Services;
 
 namespace WebApplication_Framework
 {
-    public partial class Default : System.Web.UI.Page
+    public partial class Accounts : System.Web.UI.Page
     {
         FloodGateWrapper floodgate = FloodGateWrapper.Instance;
 

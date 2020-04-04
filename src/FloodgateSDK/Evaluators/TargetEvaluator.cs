@@ -34,7 +34,7 @@ namespace FloodGate.SDK.Evaluators
                         case Consts.COMPARATOR_EQUAL_TO:
                             valid = rule.Values
                                 .ConvertAll(q => q.ToLower())
-                                .Contains(userAttributeValue);
+                                .Contains(userAttributeValue.ToLower());
 
                             log.Info($"{Consts.COMPARATOR_EQUAL_TO} {userAttributeValue} {valid}");
 
@@ -42,7 +42,7 @@ namespace FloodGate.SDK.Evaluators
                         case Consts.COMPARATOR_NOT_EQUAL_TO:
                             valid = !rule.Values
                                 .ConvertAll(q => q.ToLower())
-                                .Contains(userAttributeValue);
+                                .Contains(userAttributeValue.ToLower());
 
                             log.Info($"{Consts.COMPARATOR_NOT_EQUAL_TO} {userAttributeValue} {valid}");
 

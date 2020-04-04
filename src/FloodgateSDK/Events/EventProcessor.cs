@@ -34,7 +34,8 @@ namespace FloodGate.SDK.Events
         /// <summary>
         /// URL of the event receiver
         /// </summary>
-        public string EVENT_API_URL { get; } = "https://events.floodgate.io/api/v1/events";
+        public string EVENT_API_BASE_URL { get; } = "https://events.floodgate.io";
+
 
         /// <summary>
         /// Boolean representing if the event queue is busy being processed
@@ -62,22 +63,26 @@ namespace FloodGate.SDK.Events
 
         ILogger Logger;
 
+        EventsConfig _config;
+
         private readonly object bufferLock = new object();
 
-        public EventProcessor(ILogger logger)
+        public EventProcessor(ILogger logger, EventsConfig config)
         {
             Logger = logger;
+
+            _config = config;
 
             Initaise();
         }
 
-        private async void Initaise()
+        private void Initaise()
         {
             eventBuffer = new List<IEvent>();
 
             backgroundFlush = new Timer(BackgroundFlush, null, _backgroundFlushInterval, _backgroundFlushInterval);
-            
-            await Task.Run(() => RunEventProcessLoop());
+
+            Task.Run(() => RunEventProcessLoop()).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -86,12 +91,6 @@ namespace FloodGate.SDK.Events
         /// <param name="e">The event to be added to the queue</param>
         public void AddToQueue(IEvent e)
         {
-            // if (!haltQueue) then allow adding to the queue, otherwise wait
-            // await isQueueActive()
-            // Monitor.Enter(EventQueue, ref eventQueueBusy);
-
-            //Logger.Warning($"AddToQueue() EventQueue Count == {EventQueue.Count}");
-
             if (eventBuffer.Count >= MAX_EVENTS)
             {
                 Logger.Warning("Event queue full, force a Flush!");
@@ -107,13 +106,7 @@ namespace FloodGate.SDK.Events
                 {
                     // Add event to the queue
                     EventQueue.Add(e);
-
-                    //if (EventQueue.TryAdd(e, _eventQueueTimeout))
-                    //{
-                    //    Logger.Info($"New event added to queue ({e.EventType})");
-                    //}
                 }
-                
             }
             catch(InvalidOperationException)
             {
@@ -194,10 +187,11 @@ namespace FloodGate.SDK.Events
                         case ShutdownEvent s:
                             Logger.Info("Processing ShutdownEvent");
                             Flush();
+                            isExiting.Set(true);
                             active = false;
                             break;
-                        case FlagEvaluationEvent f:
-                        case SetUserEvent su:
+                        case FlagEvaluationEvent fe:
+                        case FlagNotFoundEvent fnf:
                             // Is there anything I need to do here relating to other events
                             // Add it to this threads buffer
 
@@ -219,6 +213,23 @@ namespace FloodGate.SDK.Events
             }
         }
 
+        public Uri BuildEventsUrl()
+        {
+            if (!string.IsNullOrEmpty(_config.EventsUrl))
+            {
+                var url = $"{_config.EventsUrl}/api/v1/ingest";
+
+                Uri uriResult;
+                bool result = Uri.TryCreate(url, UriKind.Absolute, out uriResult)
+                    && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
+
+                if (result)
+                    return new Uri(url);
+            }
+
+            return new Uri($"{EVENT_API_BASE_URL}/api/v1/ingest");
+        }
+
         /// <summary>
         /// Send the events to the server
         /// </summary>
@@ -234,7 +245,7 @@ namespace FloodGate.SDK.Events
 
             var data = new StringContent(eventsPayload, Encoding.UTF8, "application/json");
 
-            await httpClient.PostAsync(EVENT_API_URL, data);
+            await httpClient.PostAsync(BuildEventsUrl(), data);
 
             httpClient.Dispose();
         }
@@ -257,9 +268,9 @@ namespace FloodGate.SDK.Events
 
                 AddToQueue(new ShutdownEvent());
 
-                isExiting.Set(true);
+                // isExiting.Set(true);
 
-                EventQueue.CompleteAdding();
+                //EventQueue.CompleteAdding();
             }
             finally
             {

@@ -45,7 +45,7 @@ namespace FloodGate.SDK
             {
                 logger = config.Logger;
 
-                eventProcessor = new EventProcessor(logger);
+                eventProcessor = new EventProcessor(logger, new EventsConfig() { EventsUrl = config.EventsUrl } );
 
                 httpResourceFetcher = new HttpResourceFetcher(logger);
 
@@ -76,6 +76,8 @@ namespace FloodGate.SDK
         {
             try
             {
+                //config.Refresh();
+
                 // Check to see if there is a user set at the config level
                 User user = config.GetUser();
 
@@ -87,20 +89,26 @@ namespace FloodGate.SDK
                     user = overrideUser;
                 }
 
+                var flags = config.GetFlags();
+
                 // If there is no flag data present at all, return the default value
-                if (config.Flags.ToList().Count == 0)
+                // if (config.Flags.ToList().Count == 0)
+                if (flags.Count == 0)
                 {
                     logger.Error("No flag data available");
 
                     return defaultValue;
                 }
 
-                FeatureFlagEntity flag = config.Flags.Where(q => q.Key == key).SingleOrDefault();
+                // FeatureFlagEntity flag = config.Flags.Where(q => q.Key == key).SingleOrDefault();
+                FeatureFlagEntity flag = flags.Where(q => q.Key == key).SingleOrDefault();
 
                 // If no flag is found, return the default value
                 if (flag == null)
                 {
                     logger.Info($"{key} not found");
+
+                    eventProcessor.AddToQueue(new FlagNotFoundEvent(config.SdkKey, key, defaultValue.ToString()));
 
                     return defaultValue;
                 }
@@ -110,27 +118,27 @@ namespace FloodGate.SDK
                 {
                     logger.Info($"{flag.Id}, {flag.Value}");
 
-                    eventProcessor.AddToQueue(new FlagEvaluationEvent(config.SdkKey, flag));
+                    eventProcessor.AddToQueue(new FlagEvaluationEvent(config.SdkKey, flag.Key, flag.Value.ToString()));
 
                     return (T)Convert.ChangeType(flag.Value, typeof(T));
                 }
-
-                // There must be a user, log the attributes
-                eventProcessor.AddToQueue(new SetUserEvent(config.SdkKey, user));
 
                 // If targeting not enabled, try and evaluate rollouts
                 if (!flag.IsTargetingEnabled)
                 {
                     logger.Info($"{flag.Id}, {flag.Value}");
 
-                    eventProcessor.AddToQueue(new FlagEvaluationEvent(config.SdkKey, flag));
-
                     // Evaluate percentage rollouts
                     if (flag.IsRollout)
                     {
-                        
-                        return RolloutEvaluator.Evaluate<T>(key, user.Id, flag.Rollouts, (T)Convert.ChangeType(flag.Value, typeof(T)), logger); 
+                        var rolloutResult = RolloutEvaluator.Evaluate<T>(key, user.Id, flag.Rollouts, (T)Convert.ChangeType(flag.Value, typeof(T)), logger);
+
+                        eventProcessor.AddToQueue(new FlagEvaluationEvent(config.SdkKey, flag.Key, rolloutResult.ToString(), user));
+
+                        return rolloutResult;
                     }
+
+                    eventProcessor.AddToQueue(new FlagEvaluationEvent(config.SdkKey, flag.Key, flag.Value.ToString(), user));
 
                     return (T)Convert.ChangeType(flag.Value, typeof(T));
                 }
@@ -140,9 +148,11 @@ namespace FloodGate.SDK
                 {
                     logger.Info("Evaluating targets");
 
-                    eventProcessor.AddToQueue(new FlagEvaluationEvent(config.SdkKey, flag));
+                    var targetResult = TargetEvaluator.Evaluate<T>(key, user, flag, (T)Convert.ChangeType(flag.Value, typeof(T)), logger);
 
-                    return TargetEvaluator.Evaluate<T>(key, user, flag, (T)Convert.ChangeType(flag.Value, typeof(T)), logger);
+                    eventProcessor.AddToQueue(new FlagEvaluationEvent(config.SdkKey, flag.Key, targetResult.ToString(), user));
+
+                    return targetResult;
                 }
             }
             catch (Exception exception)

@@ -15,12 +15,14 @@ namespace FloodGate.SDK
 
         public override void InitializeConfig(IHttpResourceFetcher httpResourceFetcher)
         {
-            base.InitializeConfig(httpResourceFetcher);
-
             if (RefreshInterval <= 0)
             {
                 throw new ArgumentOutOfRangeException("RefreshInterval must me greater than 0 seconds");
             }
+
+            //CacheExpiry = RefreshInterval;
+
+            base.InitializeConfig(httpResourceFetcher);
 
             Logger.Debug($"RefreshInterval set to {RefreshInterval} seconds");
 
@@ -41,8 +43,6 @@ namespace FloodGate.SDK
 
         public new void Dispose()
         {
-            //base.Dispose();
-
             timer?.Dispose();
         }
     }

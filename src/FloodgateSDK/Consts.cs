@@ -26,6 +26,16 @@
 
         public const string USER_ATTRIBUTE_EMAIL = "email";
 
+        public const string USER_ATTRIBUTE_NAME = "name";
+
+        public const string USER_ATTRIBUTE_FIRSTNAME = "firstname";
+
+        public const string USER_ATTRIBUTE_LASTNAME = "lastname";
+
+        public const string USER_ATTRIBUTE_COUNTRY = "country";
+
         public const string CACHE_NAME = "floodgate_cache";
+
+        public const string FLAGS_CACHE_NAME = "floodgate_flags_cache";
     }
 }

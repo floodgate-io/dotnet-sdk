@@ -18,7 +18,7 @@ namespace FloodGate.SDK
         /// Timeout value for fetching data from CDN
         /// Value is in milliseconds
         /// </summary>
-        public int Timeout { get; set; } = 10000;
+        public int Timeout { get; set; } = 5000;
 
         /// <summary>
         /// Sdk key used to get the configuration from api.floodgate.io
@@ -48,7 +48,7 @@ namespace FloodGate.SDK
         /// <summary>
 		/// List containing FeatureFlag entities for the current environment
 		/// </summary>
-		public List<FeatureFlagEntity> Flags { get; private set; } = new List<FeatureFlagEntity>();
+		public List<FeatureFlagEntity> Flags { get; set; } = new List<FeatureFlagEntity>();
 
         /// <summary>
         /// The default state returned if a flag is not found
@@ -59,12 +59,31 @@ namespace FloodGate.SDK
 
         public string ConfigFile { get; set; } = string.Empty;
 
+        public string EventsUrl { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Stored the current ETag of the loaded configuration
+        /// </summary>
+        public string ETag { get; set; }
+
+        /// <summary>
+        /// Store the raw flag json data
+        /// </summary>
+        public string RawConfigData { get; set; } = string.Empty;
+
         /// <summary>
         /// User assigned at config level, this user is overwritten if passed in at the evaluation stage
         /// </summary>
         private User user;
 
-        //public IEventProcessor EventProcessor { get; private set; }
+        /// <summary>
+        /// When will the current cache expire
+        /// </summary>
+        //public int CacheExpiry { get; set; } = 3600; // Expire after 1 hour
+
+        //public DateTime FetchedTime { get; set; } = DateTime.Now;
+
+        //public bool IsCacheExpired { get { return DateTime.Now > FetchedTime.AddSeconds(CacheExpiry); } }
 
         public IHttpResourceFetcher HttpResourceFetcher { get; private set; }
 
@@ -77,9 +96,6 @@ namespace FloodGate.SDK
 
         public virtual void InitializeConfig(IHttpResourceFetcher httpResourceFetcher)
         {
-            //EventProcessor = new EventProcessor(Logger);
-            // EventProcessor = eventProcessor;
-
             HttpResourceFetcher = httpResourceFetcher;
 
             LoadData().Wait();
@@ -135,26 +151,13 @@ namespace FloodGate.SDK
             return new Uri($"{API_BASE_URL}/environment-files/{SdkKey}/{API_VERSION}/flags-config.json");
         }
 
+        public void Refresh()
+        {
+            LoadData().ConfigureAwait(false);
+        }
+
         protected async Task LoadData()
         {
-            // Load from cache
-            if (!DisableCache && Cache.Exists(Consts.CACHE_NAME))
-            {
-                Logger.Debug("Loading config from cache");
-
-                // TODO: add timeout check
-                var json = Cache.Retrieve<string>(Consts.CACHE_NAME);
-
-                if (ValidateJson(json))
-                {
-                    DeserializeConfigJson(json);
-
-                    isLoaded = true;
-
-                    return;
-                }
-            }
-
             // Load from local file
             if (!string.IsNullOrWhiteSpace(ConfigFile))
             {
@@ -162,6 +165,8 @@ namespace FloodGate.SDK
                 // Note this is not an async call and is blocking
                 if (FetchFlagsLocally())
                 {
+                    Logger.Debug("Loading config from local file");
+
                     isLoaded = true;
 
                     return;
@@ -169,9 +174,11 @@ namespace FloodGate.SDK
             }
 
             // Load from CDN
-            var task = FetchFlagsServerAsync();
+            Task task = FetchFlagsServerAsync();
             if (await Task.WhenAny(task, Task.Delay(Timeout)).ConfigureAwait(false) == task)
             {
+                Logger.Debug("Loading config from server");
+
                 isLoaded = true;
 
                 return;
@@ -192,15 +199,13 @@ namespace FloodGate.SDK
         {
             Logger.Info("Requesting flag data from server");
 
-            // HttpResourceFetcher httpResourceFetcher = new HttpResourceFetcher(Logger);
-
-            var json = await HttpResourceFetcher.FetchAsync(BuildUrl("flags"), string.Empty, SdkKey).ConfigureAwait(false);
+            var json = await HttpResourceFetcher.FetchAsync(BuildUrl("flags"), this, SdkKey).ConfigureAwait(false);
 
             if (ValidateJson(json))
             {
-                DeserializeConfigJson(json);
-
                 Cache.Save<string>(Consts.CACHE_NAME, json);
+
+                Logger.Info("*** Config Cached (remote) ***");
             }
         }
 
@@ -216,9 +221,9 @@ namespace FloodGate.SDK
 
                     if (ValidateJson(json))
                     {
-                        DeserializeConfigJson(json);
-
                         Cache.Save<string>(Consts.CACHE_NAME, json);
+
+                        Logger.Info("*** Config Cached (local) ***");
 
                         return true;
                     }
@@ -228,7 +233,6 @@ namespace FloodGate.SDK
             {
                 return false;
             }
-            
 
             return false;
         }
@@ -250,11 +254,24 @@ namespace FloodGate.SDK
             return true;
         }
 
+        public List<FeatureFlagEntity> GetFlags()
+        {
+            var json = Cache.Retrieve<string>(Consts.CACHE_NAME);
+            if (ValidateJson(json))
+            {
+                Logger.Info("Getting flags from cache");
+
+                return DeserializeConfigJson(json);
+            }
+
+            return new List<FeatureFlagEntity>();
+        }
+
         /// <summary>
         /// Deserialize the json config data to objects
         /// </summary>
         /// <param name="json"></param>
-        private void DeserializeConfigJson(string json)
+        private List<FeatureFlagEntity> DeserializeConfigJson(string json)
         {
             if (string.IsNullOrEmpty(json))
             {
@@ -263,20 +280,26 @@ namespace FloodGate.SDK
 
             try
             {
+                Logger.Info("Deserializing Config Json");
+
                 var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(json));
 
-                var deserializer = new DataContractJsonSerializer(Flags.GetType());
+                var deserializer = new DataContractJsonSerializer(typeof(List<FeatureFlagEntity>));
 
-                Flags = deserializer.ReadObject(memoryStream) as List<FeatureFlagEntity>;
+                var flags = deserializer.ReadObject(memoryStream) as List<FeatureFlagEntity>;
 
                 memoryStream.Close();
 
-                if (Flags == null || Flags.Count == 0)
+                memoryStream.Dispose();
+
+                if (flags == null || flags.Count == 0)
                 {
-                    throw new ApplicationException("Empty or invalid server response.");
+                    throw new ApplicationException("Empty or invalid flag configuration data");
                 }
 
                 Logger.Debug($"Loaded {Flags.Count} flags");
+
+                return flags;
             }
             catch (Exception exception)
             {

@@ -12,7 +12,7 @@
     <Description>Floodgate is a feature management service which allows you to toggle features without needing to redeploy your code. Use Floodgate to decouple your software deployments from your feature releases leading to reduced rollout risk and happier customers.</Description>
     <Copyright>Copyright 2019</Copyright>
     <RepositoryUrl>https://github.com/floodgate-io/dotnet-sdk</RepositoryUrl>
-    <PackageReleaseNotes>Updated SDK to target .NET Standard 2.0+ (.NET Core 2.0+) and .NET Framework 4.5+</PackageReleaseNotes>
+    <PackageReleaseNotes>Added new evaluator comparators for greater/less than, greater and euqal/less and equal to and ends with.</PackageReleaseNotes>
     <PackageLicenseUrl></PackageLicenseUrl>
     <RepositoryType>Git</RepositoryType>
     <PackageTags>featureflag featuretoggle canaryrelease releasemanagement softlaunch targetedlaunch cicd floodgate</PackageTags>

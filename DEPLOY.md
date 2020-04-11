@@ -6,12 +6,17 @@
 dotnet test
 ```
 
-2. Increment the FloodgateSDK package and assembly version
+2. Update `.csproj` file as follows
+
+- Increment FloodgateSDK package and assembly version
+- Update release notes as required
 
 3. Build library in Release mode
 
 ```
 dotnet build -c Release
 ```
+
+> The above command created the necessary NuGet package automatically
 
 4. Deploy NuGet Package to [nuget.org](https://www.nuget.org/packages/FloodGateSDK/)

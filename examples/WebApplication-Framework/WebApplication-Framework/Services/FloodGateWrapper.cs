@@ -21,7 +21,7 @@ namespace WebApplication_Framework.Services
                 Timeout = 50000,
                 Logger = new FileLogger(@"C:\Temp\FloodGateASPLog.txt"),
                 RefreshInterval = 5, // RefreshInterval is set to 60 seconds by default, you can override it as needed
-                // ConfigUrl = "http://localhost:8765", // Used to overwrite production URL
+                //ConfigUrl = "http://localhost:8765", // Used to overwrite production URL
                 EventsUrl = "http://localhost:3000"
                 // ConfigFile = @"c:\temp\flags.json"
             };

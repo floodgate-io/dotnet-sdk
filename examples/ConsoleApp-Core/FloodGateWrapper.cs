@@ -20,12 +20,13 @@ namespace ConsoleApp_Core
             AutoUpdateClientConfig config = new AutoUpdateClientConfig()
             {
                 //SdkKey = "89fd83c921b59e720f939062b42770214e8aca6b80d749060a22c8a5b8a5",
-                SdkKey = "2d414c28563b9788a47e5062fe9a57fd86efe69c28a31ea4aaada43cac87",
-                Timeout = 5000,
-                Logger = new ConsoleLogger(),
+                //SdkKey = "2d414c28563b9788a47e5062fe9a57fd86efe69c28a31ea4aaada43cac87",
+                SdkKey = "59bc0e85e6c3e2cc324ff52c376b65d319aaf76b6f9601b16ce8faba57ec",
+                Timeout = 50000,
+                // Logger = new ConsoleLogger(),
                 //Logger = new FileLogger(@"c:\temp\fg-log.txt"),
-                RefreshInterval = 5, // RefreshInterval is set to 60 seconds by default, you can override it as needed
-                //ConfigUrl = "http://localhost:8765", // Used to overwrite production URL
+                RefreshInterval = 10, // RefreshInterval is set to 60 seconds by default, you can override it as needed
+                ConfigUrl = "http://localhost:4572/cdn.floodgate.local", // Used to overwrite production URL
                 EventsUrl = "http://localhost:3000"
                 // ConfigFile = @"c:\temp\flags.json"
             };

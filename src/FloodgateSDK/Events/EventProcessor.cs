@@ -36,7 +36,6 @@ namespace FloodGate.SDK.Events
         /// </summary>
         public string EVENT_API_BASE_URL { get; } = "https://events.floodgate.io";
 
-
         /// <summary>
         /// Boolean representing if the event queue is busy being processed
         /// </summary>
@@ -46,11 +45,6 @@ namespace FloodGate.SDK.Events
         /// Set to true when the application is exiting to stop accepting any new events into the queue
         /// </summary>
         private AtomicBoolean isExiting = new AtomicBoolean();
-
-        /// <summary>
-        /// Locks the buffer when it's in use by another thread
-        /// </summary>
-        //private AtomicBoolean isBufferBusy = new AtomicBoolean();
 
         /// <summary>
         /// Set when a flush event occurs
@@ -172,23 +166,31 @@ namespace FloodGate.SDK.Events
         {
             bool active = true;
 
+            IEvent item = null;
+
             try
             {
                 while (active)
                 {
-                    IEvent item = EventQueue.Take();
-
+                    item = EventQueue.Take();
+                    
                     switch (item)
                     {
                         case FlushQueueEvent f:
                             Logger.Info("Processing FlushQueueEvent");
+                            
                             Flush();
+
                             break;
                         case ShutdownEvent s:
                             Logger.Info("Processing ShutdownEvent");
+                            
                             Flush();
+                            
                             isExiting.Set(true);
+                            
                             active = false;
+
                             break;
                         case FlagEvaluationEvent fe:
                         case FlagNotFoundEvent fnf:
@@ -197,10 +199,9 @@ namespace FloodGate.SDK.Events
 
                             lock (bufferLock)
                             {
-                                //Logger.Info($"Adding event to eventBuffer ({item.EventType})");
                                 eventBuffer.Add(item);
-                                Logger.Info($"eventBuffer.Count = {eventBuffer.Count}");
                             }
+
                             break;
                     }
 
@@ -209,7 +210,11 @@ namespace FloodGate.SDK.Events
             }
             catch(Exception ex)
             {
-                Logger.Error(ex.Message);
+                Flush();
+
+                isExiting.Set(true);
+
+                Logger.Error($"An error occured in the event processor, trying forced flush : {ex.Message}");
             }
         }
 
@@ -245,9 +250,18 @@ namespace FloodGate.SDK.Events
 
             var data = new StringContent(eventsPayload, Encoding.UTF8, "application/json");
 
-            await httpClient.PostAsync(BuildEventsUrl(), data);
-
-            httpClient.Dispose();
+            try
+            {
+                await httpClient.PostAsync(BuildEventsUrl(), data);
+            }
+            catch(Exception ex)
+            {
+                Logger.Error($"Failed to transmit events : {ex.Message}");
+            }
+            finally
+            {
+                httpClient.Dispose();
+            }
         }
 
         public void ManualFlush()
@@ -268,7 +282,7 @@ namespace FloodGate.SDK.Events
 
                 AddToQueue(new ShutdownEvent());
 
-                // isExiting.Set(true);
+                //isExiting.Set(true);
 
                 //EventQueue.CompleteAdding();
             }

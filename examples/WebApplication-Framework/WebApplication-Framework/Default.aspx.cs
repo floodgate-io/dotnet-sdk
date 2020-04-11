@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using FloodGate.SDK;
 using WebApplication_Framework.Services;
 
@@ -24,7 +25,15 @@ namespace WebApplication_Framework
                 CustomAttributes = customAttributes
             };
 
-            var result = floodgate.Client.GetValue("multivariate-flag", "grey", user);
+            string result = string.Empty;
+
+            for (var i = 1; i < 1000; i++)
+            {
+                result = floodgate.Client.GetValue("multivariate-flag", "grey", user);
+                Thread.Sleep(250);
+            }
+            
+            //var result = floodgate.Client.GetValue("multivariate-flag", "grey", user);
 
             lblColour.Text = $"The `multivariate-flag` flag is {result}";
 

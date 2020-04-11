@@ -15,7 +15,7 @@ namespace FloodGate.SDK
 
 		private IClientConfig config;
 
-        private IEventProcessor eventProcessor;
+        //private IEventProcessor eventProcessor;
 
         private HttpResourceFetcher httpResourceFetcher;
 
@@ -45,7 +45,7 @@ namespace FloodGate.SDK
             {
                 logger = config.Logger;
 
-                eventProcessor = new EventProcessor(logger, new EventsConfig() { EventsUrl = config.EventsUrl } );
+                //eventProcessor = new EventProcessor(logger, new EventsConfig() { EventsUrl = config.EventsUrl } );
 
                 httpResourceFetcher = new HttpResourceFetcher(logger);
 
@@ -108,7 +108,7 @@ namespace FloodGate.SDK
                 {
                     logger.Info($"{key} not found");
 
-                    eventProcessor.AddToQueue(new FlagNotFoundEvent(config.SdkKey, key, defaultValue.ToString()));
+                    //eventProcessor.AddToQueue(new FlagNotFoundEvent(config.SdkKey, key, defaultValue.ToString()));
 
                     return defaultValue;
                 }
@@ -117,10 +117,20 @@ namespace FloodGate.SDK
                 if (user == null)
                 {
                     logger.Info($"{flag.Id}, {flag.Value}");
+                    try
+                    {
+                        var noUserResult = (T)Convert.ChangeType(flag.Value, typeof(T));
 
-                    eventProcessor.AddToQueue(new FlagEvaluationEvent(config.SdkKey, flag.Key, flag.Value.ToString()));
+                        //eventProcessor.AddToQueue(new FlagEvaluationEvent(config.SdkKey, flag.Key, flag.Value.ToString()));
 
-                    return (T)Convert.ChangeType(flag.Value, typeof(T));
+                        return noUserResult;
+                    }
+                    catch (FormatException exception)
+                    {
+                        logger.Error(exception);
+
+                        return defaultValue;
+                    }
                 }
 
                 // If targeting not enabled, try and evaluate rollouts
@@ -131,16 +141,36 @@ namespace FloodGate.SDK
                     // Evaluate percentage rollouts
                     if (flag.IsRollout)
                     {
-                        var rolloutResult = RolloutEvaluator.Evaluate<T>(key, user.Id, flag.Rollouts, (T)Convert.ChangeType(flag.Value, typeof(T)), logger);
+                        try
+                        {
+                            var rolloutResult = RolloutEvaluator.Evaluate<T>(key, user.Id, flag.Rollouts, (T)Convert.ChangeType(flag.Value, typeof(T)), logger);
 
-                        eventProcessor.AddToQueue(new FlagEvaluationEvent(config.SdkKey, flag.Key, rolloutResult.ToString(), user));
+                            //eventProcessor.AddToQueue(new FlagEvaluationEvent(config.SdkKey, flag.Key, rolloutResult.ToString(), user));
 
-                        return rolloutResult;
+                            return rolloutResult;
+                        }
+                        catch (FormatException exception)
+                        {
+                            logger.Error(exception);
+
+                            return defaultValue;
+                        }
                     }
 
-                    eventProcessor.AddToQueue(new FlagEvaluationEvent(config.SdkKey, flag.Key, flag.Value.ToString(), user));
+                    try
+                    {
+                        var result = (T)Convert.ChangeType(flag.Value, typeof(T));
 
-                    return (T)Convert.ChangeType(flag.Value, typeof(T));
+                        //eventProcessor.AddToQueue(new FlagEvaluationEvent(config.SdkKey, flag.Key, flag.Value.ToString(), user));
+
+                        return result;
+                    }
+                    catch (FormatException exception)
+                    {
+                        logger.Error(exception);
+
+                        return defaultValue;
+                    }
                 }
 
                 // If targeting is enabled and there are targets present, evaluate the targets
@@ -148,11 +178,21 @@ namespace FloodGate.SDK
                 {
                     logger.Info("Evaluating targets");
 
-                    var targetResult = TargetEvaluator.Evaluate<T>(key, user, flag, (T)Convert.ChangeType(flag.Value, typeof(T)), logger);
+                    try
+                    {
+                        var targetResult = TargetEvaluator.Evaluate<T>(key, user, flag, (T)Convert.ChangeType(flag.Value, typeof(T)), logger);
 
-                    eventProcessor.AddToQueue(new FlagEvaluationEvent(config.SdkKey, flag.Key, targetResult.ToString(), user));
+                        //eventProcessor.AddToQueue(new FlagEvaluationEvent(config.SdkKey, flag.Key, targetResult.ToString(), user));
 
-                    return targetResult;
+                        return targetResult;
+                    }
+                    catch (FormatException exception)
+                    {
+                        logger.Error(exception);
+
+                        return defaultValue;
+                    }
+                    
                 }
             }
             catch (Exception exception)
@@ -195,7 +235,7 @@ namespace FloodGate.SDK
 
         public void FlushEvents()
         {
-            eventProcessor.ManualFlush();
+            //eventProcessor.ManualFlush();
         }
 
         public void Dispose()
@@ -205,10 +245,10 @@ namespace FloodGate.SDK
                 ((IDisposable)logger).Dispose();
             }
 
-            if (eventProcessor != null && eventProcessor is IDisposable)
-            {
-                ((IDisposable)eventProcessor).Dispose();
-            }
+            //if (eventProcessor != null && eventProcessor is IDisposable)
+            //{
+            //    ((IDisposable)eventProcessor).Dispose();
+            //}
 
             if (config != null && config is IDisposable)
             {

@@ -20,8 +20,9 @@ namespace FloodGate.SDK.Evaluators
 
                 foreach (var rule in target.Rules)
                 {
+                    var value = string.Empty;
 
-                    var userAttributeValue = user.GetAttributeValue(rule.Attribute);
+                    var userAttributeValue = user.GetAttributeValue(rule.Attribute)?.ToLower();
 
                     if (userAttributeValue == null)
                     {
@@ -45,6 +46,82 @@ namespace FloodGate.SDK.Evaluators
                                 .Contains(userAttributeValue.ToLower());
 
                             log.Info($"{Consts.COMPARATOR_NOT_EQUAL_TO} {userAttributeValue} {valid}");
+
+                            break;
+                        case Consts.COMPARATOR_GREATOR:
+                            value = rule.Values.FirstOrDefault();
+
+                            valid = false;
+
+                            try
+                            {
+                                if (value != null && Convert.ToDouble(userAttributeValue) > Convert.ToDouble(value))
+                                    valid = true;
+                            }
+                            catch(Exception ex)
+                            {
+                                log.Error(ex.Message);
+                            }
+                            
+
+                            log.Info($"{Consts.COMPARATOR_GREATOR} {userAttributeValue} {valid}");
+
+                            break;
+                        case Consts.COMPARATOR_GREATOR_EQUAL_TO:
+                            value = rule.Values.FirstOrDefault();
+
+                            valid = false;
+
+                            try
+                            {
+                                if (value != null && Convert.ToDouble(userAttributeValue) >= Convert.ToDouble(value))
+                                    valid = true;
+                            }
+                            catch (Exception ex)
+                            {
+                                log.Error(ex.Message);
+                            }
+
+
+                            log.Info($"{Consts.COMPARATOR_GREATOR} {userAttributeValue} {valid}");
+
+                            break;
+                        case Consts.COMPARATOR_LESS:
+                            value = rule.Values.FirstOrDefault();
+
+                            valid = false;
+
+                            try
+                            {
+                                if (value != null && Convert.ToDouble(userAttributeValue) < Convert.ToDouble(value))
+                                    valid = true;
+                            }
+                            catch (Exception ex)
+                            {
+                                log.Error(ex.Message);
+                            }
+
+
+                            log.Info($"{Consts.COMPARATOR_GREATOR} {userAttributeValue} {valid}");
+
+                            break;
+                        case Consts.COMPARATOR_LESS_EQUAL_TO:
+                            value = rule.Values.FirstOrDefault();
+
+                            valid = false;
+
+                            try
+                            {
+                                if (value != null && Convert.ToDouble(userAttributeValue) <= Convert.ToDouble(value))
+                                    valid = true;
+                            }
+                            catch (Exception ex)
+                            {
+                                log.Error(ex.Message);
+                            }
+
+
+                            log.Info($"{Consts.COMPARATOR_GREATOR} {userAttributeValue} {valid}");
 
                             break;
                         case Consts.COMPARATOR_CONTAINS:
@@ -71,6 +148,20 @@ namespace FloodGate.SDK.Evaluators
                                 valid = true;
 
                             log.Info($"{Consts.COMPARATOR_NOT_CONTAIN} {userAttributeValue} {valid}");
+
+                            break;
+
+                        case Consts.COMPARATOR_ENDS_WITH:
+                            var endsWith = rule.Values
+                                .ConvertAll(q => q.ToLower())
+                                .Where(q => userAttributeValue.EndsWith(q.ToString()) == true).FirstOrDefault();
+
+                            valid = false;
+
+                            if (endsWith != null)
+                                valid = true;
+
+                            log.Info($"{Consts.COMPARATOR_ENDS_WITH} {userAttributeValue} {valid}");
 
                             break;
                         default:

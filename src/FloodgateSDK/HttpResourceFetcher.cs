@@ -39,6 +39,7 @@ namespace FloodGate.SDK
                 if (config.ETag != null)
                 {
                     request.Headers.IfNoneMatch.Add(new EntityTagHeaderValue(config.ETag));
+                    //request.Headers.Add("ETag", config.ETag);
                 }
 
                 using (var response = await httpClient.SendAsync(request, token).ConfigureAwait(false))

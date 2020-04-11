@@ -297,7 +297,7 @@ namespace FloodGate.SDK
                     throw new ApplicationException("Empty or invalid flag configuration data");
                 }
 
-                Logger.Debug($"Loaded {Flags.Count} flags");
+                Logger.Debug($"Loaded {flags.Count} flags");
 
                 return flags;
             }

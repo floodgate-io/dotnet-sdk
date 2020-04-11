@@ -22,6 +22,8 @@
 
         public const int COMPARATOR_NOT_CONTAIN = 8;
 
+        public const int COMPARATOR_ENDS_WITH = 9;
+
         public const string USER_ATTRIBUTE_ID = "id";
 
         public const string USER_ATTRIBUTE_EMAIL = "email";

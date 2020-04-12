@@ -27,13 +27,13 @@ namespace WebApplication_Framework
 
             string result = string.Empty;
 
-            for (var i = 1; i < 1000; i++)
-            {
-                result = floodgate.Client.GetValue("multivariate-flag", "grey", user);
-                Thread.Sleep(250);
-            }
-            
-            //var result = floodgate.Client.GetValue("multivariate-flag", "grey", user);
+            //for (var i = 1; i < 1000; i++)
+            //{
+            //    result = floodgate.Client.GetValue("multivariate-flag", "grey", user);
+            //    Thread.Sleep(250);
+            //}
+
+            result = floodgate.Client.GetValue("multivariate-flag", "grey", user);
 
             lblColour.Text = $"The `multivariate-flag` flag is {result}";
 

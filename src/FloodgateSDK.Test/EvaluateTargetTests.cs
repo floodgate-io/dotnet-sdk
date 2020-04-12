@@ -22,7 +22,7 @@ namespace FloodGate.SDK.Tests
             {
                 Email = "spiderman@marvel.com",
                 Name = "Peter Parker",
-                Country = "US",
+                // Country = "US",
                 // CustomAttributes = customAttributes
             };
 
@@ -231,7 +231,7 @@ namespace FloodGate.SDK.Tests
         // Positive - Does not Contain
         [DataTestMethod]
         [DataRow(@"..\..\..\test-config.json", "yellow")]
-        public void ValidateFlagResponse_TargetNotContains_ShouldReturnRed(string configFile, string expected)
+        public void ValidateFlagResponse_TargetNotContains_ShouldReturnYellow(string configFile, string expected)
         {
             User user = new User("d2405fc0-c9cd-49e7-a07e-bf244d6d360b")
             {
@@ -261,9 +261,14 @@ namespace FloodGate.SDK.Tests
         [DataRow(@"..\..\..\test-config.json", "yellow")]
         public void ValidateFlagResponse_TargetEndsWith_ShouldReturnYellow(string configFile, string expected)
         {
+            var customAttributes = new Dictionary<string, string>() {
+                // { "name", "Peter Parker" }, // left for backwards compatability testing
+                { "Country", "United Kingdom" }, // left for backwards compatability testing
+            };
+
             User user = new User("d2405fc0-c9cd-49e7-a07e-bf244d6d360b")
             {
-                Country = "United Kingdom"
+                CustomAttributes = customAttributes
             };
 
             AutoUpdateClientConfig config = new AutoUpdateClientConfig()
@@ -527,9 +532,13 @@ namespace FloodGate.SDK.Tests
         [DataRow(@"..\..\..\test-config.json", "red")]
         public void ValidateFlagResponse_TargetEndsWith_ShouldReturnDefault(string configFile, string expected)
         {
+            var customAttributes = new Dictionary<string, string>() {
+                { "Country", "United States" }
+            };
+
             User user = new User("d2405fc0-c9cd-49e7-a07e-bf244d6d360b")
             {
-                Country = "United States"
+                CustomAttributes = customAttributes
             };
 
             AutoUpdateClientConfig config = new AutoUpdateClientConfig()

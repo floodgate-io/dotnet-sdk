@@ -10,9 +10,9 @@
 
         public const int COMPARATOR_NOT_EQUAL_TO = 2;
 
-        public const int COMPARATOR_GREATOR = 3;
+        public const int COMPARATOR_GREATER = 3;
 
-        public const int COMPARATOR_GREATOR_EQUAL_TO = 4;
+        public const int COMPARATOR_GREATER_EQUAL_TO = 4;
 
         public const int COMPARATOR_LESS = 5;
 
@@ -29,12 +29,6 @@
         public const string USER_ATTRIBUTE_EMAIL = "email";
 
         public const string USER_ATTRIBUTE_NAME = "name";
-
-        public const string USER_ATTRIBUTE_FIRSTNAME = "firstname";
-
-        public const string USER_ATTRIBUTE_LASTNAME = "lastname";
-
-        public const string USER_ATTRIBUTE_COUNTRY = "country";
 
         public const string CACHE_NAME = "floodgate_cache";
 

@@ -48,7 +48,7 @@ namespace FloodGate.SDK.Evaluators
                             log.Info($"{Consts.COMPARATOR_NOT_EQUAL_TO} {userAttributeValue} {valid}");
 
                             break;
-                        case Consts.COMPARATOR_GREATOR:
+                        case Consts.COMPARATOR_GREATER:
                             value = rule.Values.FirstOrDefault();
 
                             valid = false;
@@ -64,10 +64,10 @@ namespace FloodGate.SDK.Evaluators
                             }
                             
 
-                            log.Info($"{Consts.COMPARATOR_GREATOR} {userAttributeValue} {valid}");
+                            log.Info($"{Consts.COMPARATOR_GREATER} {userAttributeValue} {valid}");
 
                             break;
-                        case Consts.COMPARATOR_GREATOR_EQUAL_TO:
+                        case Consts.COMPARATOR_GREATER_EQUAL_TO:
                             value = rule.Values.FirstOrDefault();
 
                             valid = false;
@@ -83,7 +83,7 @@ namespace FloodGate.SDK.Evaluators
                             }
 
 
-                            log.Info($"{Consts.COMPARATOR_GREATOR} {userAttributeValue} {valid}");
+                            log.Info($"{Consts.COMPARATOR_GREATER_EQUAL_TO} {userAttributeValue} {valid}");
 
                             break;
                         case Consts.COMPARATOR_LESS:
@@ -102,7 +102,7 @@ namespace FloodGate.SDK.Evaluators
                             }
 
 
-                            log.Info($"{Consts.COMPARATOR_GREATOR} {userAttributeValue} {valid}");
+                            log.Info($"{Consts.COMPARATOR_LESS} {userAttributeValue} {valid}");
 
                             break;
                         case Consts.COMPARATOR_LESS_EQUAL_TO:
@@ -121,7 +121,7 @@ namespace FloodGate.SDK.Evaluators
                             }
 
 
-                            log.Info($"{Consts.COMPARATOR_GREATOR} {userAttributeValue} {valid}");
+                            log.Info($"{Consts.COMPARATOR_LESS_EQUAL_TO} {userAttributeValue} {valid}");
 
                             break;
                         case Consts.COMPARATOR_CONTAINS:

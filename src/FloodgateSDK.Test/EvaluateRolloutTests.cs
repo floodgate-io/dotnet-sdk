@@ -11,11 +11,11 @@ namespace FloodGate.SDK.Tests
 
         // Rollout Tests
         [DataTestMethod]
-        [DataRow(@"..\..\..\test-config.json", "1fa1cc72-6463-47d8-87df-a05a4e832dba", "red")]
-        [DataRow(@"..\..\..\test-config.json", "4d5817c5-4450-4cd4-b035-e24c2b72d50a", "green")]
-        [DataRow(@"..\..\..\test-config.json", "1dd97efd-62eb-418c-b2fe-11dd0ca188e0", "yellow")]
-        [DataRow(@"..\..\..\test-config.json", "da50fc56-16b5-4fbd-960a-89405968e881", "orange")]
-        [DataRow(@"..\..\..\test-config.json", "cb3c2d9c-9908-4f80-b7a4-c3cf2aa4d134", "blue")]
+        [DataRow(@"..\..\..\test-config.json", "a9ac317e-6510-4903-9a42-e43d775b816d", "red")]
+        [DataRow(@"..\..\..\test-config.json", "a8ca3305-d4fc-4865-ae75-72edb8949244", "green")]
+        [DataRow(@"..\..\..\test-config.json", "ec144edb-7102-4091-ae1a-0d7b5f74707a", "yellow")]
+        [DataRow(@"..\..\..\test-config.json", "1fa1cc72-6463-47d8-87df-a05a4e832dba", "orange")]
+        [DataRow(@"..\..\..\test-config.json", "7af3cd58-dc5b-4d53-982b-4892fd9b7df2", "blue")]
         public void ValidateFlagResponse_Rollout_ShouldReturnValid(string configFile, string userId, string expected)
         {
             User user = new User(userId);

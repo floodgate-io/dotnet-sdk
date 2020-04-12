@@ -9,7 +9,7 @@ namespace FloodGate.SDK.Evaluators
         {
             var hashString = key + id;
 
-            var hash = HashString(id).Substring(0, 7);
+            var hash = HashString(hashString).Substring(0, 7);
 
             var scale = int.Parse(hash, System.Globalization.NumberStyles.HexNumber) % 100;
 

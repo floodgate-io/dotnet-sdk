@@ -23,12 +23,6 @@ namespace FloodGate.SDK
 
         public string Name { get; set; }
 
-        public string FirstName { get; set; }
-
-        public string LastName { get; set; }
-
-        public string Country { get; set; }
-
         /// <summary>
         /// Disctionary containing custom attributes of the user
         /// </summary>
@@ -60,15 +54,6 @@ namespace FloodGate.SDK
 
             if (key == Consts.USER_ATTRIBUTE_NAME.ToLower())
                 return Name;
-
-            if (key == Consts.USER_ATTRIBUTE_FIRSTNAME.ToLower())
-                return FirstName;
-
-            if (key == Consts.USER_ATTRIBUTE_LASTNAME.ToLower())
-                return LastName;
-
-            if (key == Consts.USER_ATTRIBUTE_COUNTRY.ToLower())
-                return Country;
 
             // Check custom attributes
             var attribute = CustomAttributes.Where(q => q.Key.ToLower() == key.ToLower()).FirstOrDefault();
